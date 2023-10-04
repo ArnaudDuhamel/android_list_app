@@ -69,7 +69,7 @@ fun funData() {
     }
 
     var checkBoxStates = remember {
-        mutableStateMapOf<String, Boolean>().withDefault { false }
+        mutableStateMapOf<Int, Boolean>().withDefault { false }
     }
 // this variable use to handle edit text input value
     val inputValue = remember { mutableStateOf(TextFieldValue()) }
@@ -142,8 +142,10 @@ fun funData() {
 
                 Button(
                     onClick = {
-                            notesList.removeIf {
-                                checkBoxStates.getValue(it) == true
+                            notesList.forEachIndexed { index, element ->
+                               if (checkBoxStates.getValue(index) == true) {
+                                   notesList.remove(element)
+                               }
                             }
 
                             checkBoxStates.forEach {
@@ -189,15 +191,15 @@ fun funData() {
             Surface(/*modifier = Modifier.padding(bottom = 5.dp)*/) {
                 LazyColumn {
 
-                    itemsIndexed(notesList) {_ , item ->
+                    itemsIndexed(notesList) {index , item ->
 
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp)
                                 .toggleable(
-                                    value = checkBoxStates.getValue(item),
-                                    onValueChange = { checkBoxStates[item] = it }
+                                    value = checkBoxStates.getValue(index),
+                                    onValueChange = { checkBoxStates[index] = it }
                                 ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -210,9 +212,9 @@ fun funData() {
                             )
 
                             Checkbox(
-                                checked = checkBoxStates.getValue(item) ,
+                                checked = checkBoxStates.getValue(index) ,
                                 onCheckedChange = {
-                                    checkBoxStates[item] = it
+                                    checkBoxStates[index] = it
                                 },
                                 modifier = Modifier.weight(0.15f)
                             )
