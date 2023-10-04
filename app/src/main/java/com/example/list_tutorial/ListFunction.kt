@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.toggleable
@@ -22,6 +23,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Surface
@@ -125,9 +127,11 @@ fun funData() {
                 )
             Spacer(modifier = Modifier.height(15.dp))
             Row(
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                modifier = Modifier.fillMaxWidth(0.85f)
             ){
                 Button(
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         if (!Regex("^$| +$").matches(inputValue.value.text)) {
                             notesList.add(inputValue.value.text)
@@ -141,6 +145,7 @@ fun funData() {
                 }
 
                 Button(
+                    modifier = Modifier.weight(1f),
                     onClick = {
                             notesList.forEachIndexed { index, element ->
                                if (checkBoxStates.getValue(index) == true) {
@@ -162,6 +167,7 @@ fun funData() {
                 }
 
                 Button(
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         notesList.clear()
                         checkBoxStates.clear()
@@ -183,44 +189,44 @@ fun funData() {
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-                thickness = 1.dp
-            )
 
-            Surface(/*modifier = Modifier.padding(bottom = 5.dp)*/) {
-                LazyColumn {
+            Surface() {
+                LazyColumn (
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 
                     itemsIndexed(notesList) {index , item ->
 
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxWidth(0.85f)
                                 .height(50.dp)
                                 .toggleable(
                                     value = checkBoxStates.getValue(index),
                                     onValueChange = { checkBoxStates[index] = it }
                                 ),
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
 
                             Text(
                                 text = item,
                                 modifier = Modifier
-                                    .weight(0.85f)
-                                    .padding(start = 10.dp)
+                                    .weight(0.92f)
                             )
-
-                            Checkbox(
-                                checked = checkBoxStates.getValue(index) ,
-                                onCheckedChange = {
-                                    checkBoxStates[index] = it
-                                },
-                                modifier = Modifier.weight(0.15f)
-                            )
+                            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                                Checkbox(
+                                    checked = checkBoxStates.getValue(index),
+                                    onCheckedChange = {
+                                        checkBoxStates[index] = it
+                                    },
+                                    modifier = Modifier
+                                        .weight(0.08f)
+                                        .padding(start = 5.dp)
+                                )
+                            }
                         }
                         HorizontalDivider(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth(0.85f),
                             thickness = 1.dp
                         )
                     }
