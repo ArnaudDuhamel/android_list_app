@@ -100,6 +100,7 @@ fun funData() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+                // input text field
                 TextField(
                     value = inputValue.value,
                     onValueChange = {
@@ -134,6 +135,7 @@ fun funData() {
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier.fillMaxWidth(0.85f)
             ){
+                // The row with the 3 action buttons
                 Button(
                     modifier = Modifier.weight(1f),
                     onClick = {
@@ -152,6 +154,8 @@ fun funData() {
                 Button(
                     modifier = Modifier.weight(1f),
                     onClick = {
+                        // we put the notes into a list, iterate over it
+                        // and remove values that are checked
                         ids = notesList.entries.toList()
                         ids.forEach { (key, element) ->
                                if (checkBoxStates.getValue(key) == true) {
@@ -159,9 +163,6 @@ fun funData() {
                                    checkBoxStates.remove(key)
                                }
                             }
-
-
-
                               }
                     ,
                     shape = RectangleShape
@@ -198,6 +199,9 @@ fun funData() {
                 LazyColumn (
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // the same principle is used as in the delete action
+                    // but only becaues the itemsIndexed function needs to have
+                    // a list
                     ids = notesList.entries.toList()
                     itemsIndexed(ids) {_, entry ->
 
@@ -211,13 +215,14 @@ fun funData() {
                                 ),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-
+                            // This text object contains the list item itself
                             Text(
                                 text = notesList.getValue(entry.key),
                                 modifier = Modifier
                                     .weight(0.92f)
                             )
-
+                                // The checkbox. Great care was take to look as much as possible
+                                // as the presented sketch
                                 Checkbox(
                                     checked = checkBoxStates.getValue(entry.key),
                                     onCheckedChange = {
