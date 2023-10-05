@@ -2,7 +2,6 @@ package com.example.list_tutorial
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +19,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,27 +40,41 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.graphics.RectangleShape
-import com.example.list_tutorial.ui.theme.DarkBlue
 import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun funData() {
-    val focusManager = LocalFocusManager.current
-    var keyboardHide = false
+    val DarkBlue = Color(0xFF495d92)
 
+    // To remove focus on the textfield when pressing on the add button and on
+    // the dome ime action
+    val focusManager = LocalFocusManager.current
+
+    // The variable used to give a unique id to each list item
+    var id = 0
+
+    // The map of text inputs
     val notesList = remember {
-        mutableStateListOf<String>()
+        mutableStateMapOf<Int,String>().withDefault { "" }
     }
 
-    var checkBoxStates = remember {
+    // This variable is used in the delete action
+    // It makes a copy of the notes list
+    // I spent hours figuring out a way to be able to iterate over
+    // the lists while being able to modify them. This was the solution
+    // a list copy
+    var ids: List<MutableMap.MutableEntry<Int, String>>
+
+    // The variable to see if the box of a list item is checked or not
+    val checkBoxStates = remember {
         mutableStateMapOf<Int, Boolean>().withDefault { false }
     }
 
+    // The input in the text field is stored
     val inputValue = remember { mutableStateOf(TextFieldValue()) }
 
     Scaffold(
@@ -126,7 +138,8 @@ fun funData() {
                     modifier = Modifier.weight(1f),
                     onClick = {
                         if (!Regex("^$| +$").matches(inputValue.value.text)) {
-                            notesList.add(inputValue.value.text)
+                            notesList[id] = inputValue.value.text
+                            id++
                             focusManager.clearFocus()
                         }
                         inputValue.value = TextFieldValue()
@@ -139,17 +152,15 @@ fun funData() {
                 Button(
                     modifier = Modifier.weight(1f),
                     onClick = {
-                            notesList.forEachIndexed { index, element ->
-                               if (checkBoxStates.getValue(index) == true) {
-                                   notesList.remove(element)
+                        ids = notesList.entries.toList()
+                        ids.forEach { (key, element) ->
+                               if (checkBoxStates.getValue(key) == true) {
+                                   notesList.remove(key)
+                                   checkBoxStates.remove(key)
                                }
                             }
 
-                            checkBoxStates.forEach {
-                                if (it.value){
-                                    checkBoxStates.remove(it.key)
-                                }
-                            }
+
 
                               }
                     ,
@@ -163,6 +174,7 @@ fun funData() {
                     onClick = {
                         notesList.clear()
                         checkBoxStates.clear()
+                        id = 0
                     },
                     shape = RectangleShape
                 ) {
@@ -186,30 +198,30 @@ fun funData() {
                 LazyColumn (
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
-                    itemsIndexed(notesList) {index , item ->
+                    ids = notesList.entries.toList()
+                    itemsIndexed(ids) {_, entry ->
 
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(0.85f)
                                 .height(50.dp)
                                 .toggleable(
-                                    value = checkBoxStates.getValue(index),
-                                    onValueChange = { checkBoxStates[index] = it }
+                                    value = checkBoxStates.getValue(entry.key),
+                                    onValueChange = { checkBoxStates[entry.key] = it }
                                 ),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
 
                             Text(
-                                text = item,
+                                text = notesList.getValue(entry.key),
                                 modifier = Modifier
                                     .weight(0.92f)
                             )
 
                                 Checkbox(
-                                    checked = checkBoxStates.getValue(index),
+                                    checked = checkBoxStates.getValue(entry.key),
                                     onCheckedChange = {
-                                        checkBoxStates[index] = it
+                                        checkBoxStates[entry.key] = it
                                     },
                                     modifier = Modifier
                                         .weight(0.08f)
