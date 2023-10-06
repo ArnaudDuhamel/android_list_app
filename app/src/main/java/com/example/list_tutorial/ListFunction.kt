@@ -62,13 +62,6 @@ fun funData() {
         mutableStateMapOf<Int,String>().withDefault { "" }
     }
 
-    // This variable is used in the delete action
-    // It makes a copy of the notes list
-    // I spent hours figuring out a way to be able to iterate over
-    // the lists while being able to modify them. This was the solution
-    // a list copy
-    var ids: List<MutableMap.MutableEntry<Int, String>>
-
     // The variable to see if the box of a list item is checked or not
     val checkBoxStates = remember {
         mutableStateMapOf<Int, Boolean>().withDefault { false }
@@ -154,15 +147,15 @@ fun funData() {
                 Button(
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        // we put the notes into a list, iterate over it
-                        // and remove values that are checked
-                        ids = notesList.entries.toList()
-                        ids.forEach { (key, element) ->
-                               if (checkBoxStates.getValue(key) == true) {
-                                   notesList.remove(key)
-                                   checkBoxStates.remove(key)
-                               }
-                            }
+
+                              notesList.keys.removeIf { key ->
+                                  checkBoxStates.getValue(key) == true
+                              }
+
+                        checkBoxStates.values.removeIf {value ->
+                                  value == true
+                        }
+
                               }
                     ,
                     shape = RectangleShape
@@ -199,34 +192,32 @@ fun funData() {
                 LazyColumn (
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // the same principle is used as in the delete action
-                    // but only becaues the itemsIndexed function needs to have
-                    // a list
-                    ids = notesList.entries.toList()
-                    itemsIndexed(ids) {_, entry ->
+                    // here the notesList is changed into a list because the itemsIndexed
+                    // function takes a list
+                    itemsIndexed(notesList.toList()) {_, entry ->
 
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(0.85f)
                                 .height(50.dp)
                                 .toggleable(
-                                    value = checkBoxStates.getValue(entry.key),
-                                    onValueChange = { checkBoxStates[entry.key] = it }
+                                    value = checkBoxStates.getValue(entry.first),
+                                    onValueChange = { checkBoxStates[entry.first] = it }
                                 ),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // This text object contains the list item itself
                             Text(
-                                text = notesList.getValue(entry.key),
+                                text = notesList.getValue(entry.first),
                                 modifier = Modifier
                                     .weight(0.92f)
                             )
                                 // The checkbox. Great care was take to look as much as possible
                                 // as the presented sketch
                                 Checkbox(
-                                    checked = checkBoxStates.getValue(entry.key),
+                                    checked = checkBoxStates.getValue(entry.first),
                                     onCheckedChange = {
-                                        checkBoxStates[entry.key] = it
+                                        checkBoxStates[entry.first] = it
                                     },
                                     modifier = Modifier
                                         .weight(0.08f)
