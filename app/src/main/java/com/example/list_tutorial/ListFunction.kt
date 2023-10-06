@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
@@ -59,7 +60,7 @@ fun funData() {
 
     // The map of text inputs
     val notesList = remember {
-        mutableStateMapOf<Int,String>().withDefault { "" }
+        mutableStateListOf<Pair<Int,String>>()
     }
 
     // The variable to see if the box of a list item is checked or not
@@ -133,7 +134,7 @@ fun funData() {
                     modifier = Modifier.weight(1f),
                     onClick = {
                         if (!Regex("^$| +$").matches(inputValue.value.text)) {
-                            notesList[id] = inputValue.value.text
+                            notesList.add(Pair(id, inputValue.value.text))
                             id++
                             focusManager.clearFocus()
                         }
@@ -148,8 +149,8 @@ fun funData() {
                     modifier = Modifier.weight(1f),
                     onClick = {
 
-                              notesList.keys.removeIf { key ->
-                                  checkBoxStates.getValue(key) == true
+                              notesList.removeIf { pair ->
+                                  checkBoxStates.getValue(pair.first) == true
                               }
 
                         checkBoxStates.values.removeIf {value ->
@@ -194,30 +195,30 @@ fun funData() {
                 ) {
                     // here the notesList is changed into a list because the itemsIndexed
                     // function takes a list
-                    itemsIndexed(notesList.toList()) {_, entry ->
+                    itemsIndexed(notesList) {_, pair ->
 
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(0.85f)
                                 .height(50.dp)
                                 .toggleable(
-                                    value = checkBoxStates.getValue(entry.first),
-                                    onValueChange = { checkBoxStates[entry.first] = it }
+                                    value = checkBoxStates.getValue(pair.first),
+                                    onValueChange = { checkBoxStates[pair.first] = it }
                                 ),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // This text object contains the list item itself
                             Text(
-                                text = notesList.getValue(entry.first),
+                                text = pair.second,
                                 modifier = Modifier
                                     .weight(0.92f)
                             )
                                 // The checkbox. Great care was take to look as much as possible
                                 // as the presented sketch
                                 Checkbox(
-                                    checked = checkBoxStates.getValue(entry.first),
+                                    checked = checkBoxStates.getValue(pair.first),
                                     onCheckedChange = {
-                                        checkBoxStates[entry.first] = it
+                                        checkBoxStates[pair.first] = it
                                     },
                                     modifier = Modifier
                                         .weight(0.08f)
